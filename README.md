@@ -30,8 +30,6 @@ https://regex-to-fa-project.vercel.app/
 
 ![RegExp to Automaton Visualizer UI](public/project-screenshot.png)
 
-If the screenshot is not visible on GitHub, place the image file at `public/project-screenshot.png`.
-
 ## Implemented Features
 
 - Regex parsing to postfix notation
