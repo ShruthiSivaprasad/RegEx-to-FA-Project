@@ -24,6 +24,7 @@ export default function NFAGraph({ nfa, activeStates = [], activeEdge = null }: 
   const containerRef = useRef<HTMLDivElement>(null);
   const cyRef = useRef<cytoscape.Core | null>(null);
   const resizeObserverRef = useRef<ResizeObserver | null>(null);
+  const initialViewRef = useRef<{ zoom: number; pan: { x: number; y: number } } | null>(null);
 
   useEffect(() => {
     if (!containerRef.current || !nfa) return;
@@ -263,6 +264,10 @@ export default function NFAGraph({ nfa, activeStates = [], activeEdge = null }: 
       deadNode.unlock();
       deadNode.position({ x: extent.x2 - 28, y: extent.y2 - 28 });
       deadNode.lock();
+      initialViewRef.current = {
+        zoom: cy.zoom(),
+        pan: { ...cy.pan() },
+      };
     };
 
     positionDeadNode();
@@ -317,5 +322,60 @@ export default function NFAGraph({ nfa, activeStates = [], activeEdge = null }: 
     );
   }
 
-  return <div ref={containerRef} className="w-full h-full" />;
+  function handleRecenter() {
+    const cy = cyRef.current;
+    const initialView = initialViewRef.current;
+    if (!cy || !initialView) return;
+    cy.animate(
+      {
+        zoom: initialView.zoom,
+        pan: initialView.pan,
+      } as any,
+      {
+        duration: 320,
+        easing: 'ease-in-out',
+      }
+    );
+  }
+
+  function handleFitToScreen() {
+    const cy = cyRef.current;
+    if (!cy) return;
+    cy.animate(
+      {
+        fit: {
+          eles: cy.elements(),
+          padding: 30,
+        },
+      } as any,
+      {
+        duration: 320,
+        easing: 'ease-in-out',
+      }
+    );
+  }
+
+  return (
+    <div className="w-full h-full relative">
+      <div className="absolute top-2 right-2 z-10 flex items-center gap-1.5">
+        <button
+          type="button"
+          onClick={handleRecenter}
+          className="px-2 py-1 rounded-[2px] border border-[var(--border-subtle)] bg-slate-900/70 text-slate-300 text-[11px] hover:text-[var(--accent-teal)] hover:border-[var(--accent-teal)]/40 transition-colors"
+          style={{ fontFamily: 'var(--font-mono)' }}
+        >
+          ⌖ Recenter
+        </button>
+        <button
+          type="button"
+          onClick={handleFitToScreen}
+          className="px-2 py-1 rounded-[2px] border border-[var(--border-subtle)] bg-slate-900/70 text-slate-300 text-[11px] hover:text-[var(--accent-teal)] hover:border-[var(--accent-teal)]/40 transition-colors"
+          style={{ fontFamily: 'var(--font-mono)' }}
+        >
+          Fit
+        </button>
+      </div>
+      <div ref={containerRef} className="w-full h-full" />
+    </div>
+  );
 }
