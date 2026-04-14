@@ -162,7 +162,7 @@ export default function HomePage() {
               </h2>
 
               <ol className="space-y-3 text-sm text-slate-300 leading-relaxed list-decimal pl-5">
-                <li>Head to the Simulator page using the Launch Simulator button above.</li>
+                <li>Head to the Simulator page using the Launch Simulator button below.</li>
                 <li>Click <code style={{ fontFamily: 'var(--font-mono)' }}>Convert</code> to build the E-NFA using Thompson's Construction.</li>
                 <li>Watch the Construction tab to see each rule applied step by step: the left panel shows which rule, the right panel builds the NFA live.</li>
                 <li>Switch to Automaton Graphs to see the complete E-NFA and the DFA side by side (built via Subset Construction).</li>
