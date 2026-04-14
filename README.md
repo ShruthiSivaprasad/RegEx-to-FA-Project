@@ -1,8 +1,6 @@
 # RegExp to Automaton Visualizer
 
-## Start Here 
-
-Open the deployed project first:
+Open the deployed project:
 
 ### https://regex-to-fa-project.vercel.app/
 
@@ -21,10 +19,6 @@ It also includes complete visual and educational support for checking correctnes
 - String simulator with step controls and autoplay
 - Suggested sample strings (accepted and rejected) generated from the DFA
 - Dead-state visualization (∅) and dead-transition explanation during simulation
-
-## Live Deployment
-
-https://regex-to-fa-project.vercel.app/
 
 ## Project Screenshot
 
