@@ -1,36 +1,79 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# RegExp to Automaton Visualizer
 
-## Getting Started
+This project is an interactive Theory of Computation tool that converts a regular expression into:
 
-First, run the development server:
+- an epsilon-NFA using Thompson's Construction
+- a DFA using Subset Construction
+
+It also provides step-by-step simulation and visual graph/table views for verification.
+
+## Project Context
+
+This repository is submitted for academic evaluation.
+The implementation focuses on correctness, transparency of construction, and explainable simulation behavior.
+
+## Live Deployment
+
+Add deployed URL here.
+
+## Implemented Features
+
+- Regex parsing to postfix notation
+- Thompson stepper for epsilon-NFA construction
+- Subset-construction DFA generation
+- DFA completion pass with explicit dead state (∅)
+- Graph visualizations for epsilon-NFA and DFA
+- DFA transition table view
+- String simulator with step controls, autoplay, and reset
+- Active-state highlighting in graph and table
+- Dead/trap-state handling with visual feedback and explanatory notes
+
+## What To Check 
+
+1. Enter a regex such as (a|b)*abb and click Convert.
+2. Open Construction and verify postfix-driven NFA building steps.
+3. Open Automaton Graphs and inspect both epsilon-NFA and DFA structure.
+4. Open DFA Transition Table and verify transitions are complete for every state-symbol pair.
+5. Run simulation in DFA mode with accepted and rejected strings.
+6. For rejected transitions, confirm movement to dead state ∅ is shown and remains stable.
+
+## Local Run Instructions
+
+Prerequisites:
+
+- Node.js 18 or newer
+- npm
+
+Install and run:
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Production build:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm run start
+```
 
-## Learn More
+## Tech Stack
 
-To learn more about Next.js, take a look at the following resources:
+- Next.js (App Router)
+- React + TypeScript
+- Tailwind CSS
+- Cytoscape.js (graph rendering)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Repository Structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- app: page layout and top-level UI composition
+- components: input, stepper, simulator, graphs, and transition table
+- lib: parser, Thompson construction, subset construction, simulation, and shared types
 
-## Deploy on Vercel
+## Notes
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- The epsilon-NFA is intentionally not completed over all symbols.
+- The DFA is explicitly completed with dead-state transitions to satisfy formal DFA requirements.
