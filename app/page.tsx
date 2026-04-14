@@ -11,6 +11,7 @@ import { parseRegex } from '@/lib/parser';
 import { buildNFAWithSteps } from '@/lib/thompson';
 import { buildDFA } from '@/lib/subset';
 import { NFA, DFA, ThompsonStep, ActiveEdge } from '@/lib/types';
+import { generateSampleStrings, SampleString } from '@/lib/sampleStrings';
 
 // Cytoscape components must be dynamically loaded (no SSR)
 const NFAGraph = dynamic(() => import('@/components/NFAGraph'), {
@@ -50,6 +51,7 @@ export default function HomePage() {
   const [dfaActiveState, setDfaActiveState] = useState<string>('');
   const [nfaActiveEdge, setNfaActiveEdge] = useState<ActiveEdge | null>(null);
   const [dfaActiveEdge, setDfaActiveEdge] = useState<ActiveEdge | null>(null);
+  const [sampleStrings, setSampleStrings] = useState<SampleString[]>([]);
   const [postfix, setPostfix] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'construction' | 'graphs' | 'table'>('construction');
 
@@ -67,6 +69,7 @@ export default function HomePage() {
       setThompsonSteps(steps);
       const builtDFA = buildDFA(builtNFA);
       setDfa(builtDFA);
+      setSampleStrings(generateSampleStrings(builtDFA));
       setActiveTab('construction');
     } catch (e: any) {
       setError(e.message ?? 'Unknown error');
@@ -74,6 +77,7 @@ export default function HomePage() {
       setDfa(null);
       setNfaActiveEdge(null);
       setDfaActiveEdge(null);
+      setSampleStrings([]);
       setThompsonSteps([]);
       setPostfix(null);
     }
@@ -112,6 +116,119 @@ export default function HomePage() {
       </header>
 
       <main className="flex-1 flex flex-col max-w-screen-2xl mx-auto w-full px-6 py-6 gap-6">
+        {/* ─── Educational Reference Panel ───────────────── */}
+        <section
+          className="rounded-[2px] bg-[var(--bg-secondary)]/80 border border-[var(--border-subtle)] shadow-xl overflow-hidden"
+          aria-label="Educational Reference"
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-[var(--border-subtle)]">
+            {/* Left: Thompson Rules */}
+            <div className="p-4 lg:p-5 h-[430px] overflow-y-auto">
+              <h2
+                className="text-base md:text-lg font-bold text-[var(--accent-teal)] mb-4"
+                style={{ fontFamily: 'var(--font-mono)' }}
+              >
+                Thompson's Construction Rules
+              </h2>
+
+              <div className="space-y-3 text-sm text-slate-300 leading-relaxed">
+                <div className="rounded-[6px] border border-[var(--border-subtle)] bg-slate-900/35 p-3">
+                  <p className="mb-1.5">
+                    <code className="px-1.5 py-0.5 rounded-[2px] border border-[var(--accent-teal)]/40 text-[var(--accent-teal)]" style={{ fontFamily: 'var(--font-mono)' }}>
+                      Literal
+                    </code>
+                  </p>
+                  <p className="text-xs text-slate-400 mb-2" style={{ fontFamily: 'var(--font-mono)' }}>
+                    q0 --a--&gt; q1
+                  </p>
+                  <p>A single character <code style={{ fontFamily: 'var(--font-mono)' }}>a</code> becomes two states with one transition: q→a→q'. Simple as it gets.</p>
+                </div>
+
+                <div className="rounded-[6px] border border-[var(--border-subtle)] bg-slate-900/35 p-3">
+                  <p className="mb-1.5">
+                    <code className="px-1.5 py-0.5 rounded-[2px] border border-[var(--accent-teal)]/40 text-[var(--accent-teal)]" style={{ fontFamily: 'var(--font-mono)' }}>
+                      Union (a|b)
+                    </code>
+                  </p>
+                  <p className="text-xs text-slate-400 mb-2" style={{ fontFamily: 'var(--font-mono)' }}>
+                    qs --e--&gt; a-branch --e--&gt; qf
+                    <br />
+                    qs --e--&gt; b-branch --e--&gt; qf
+                  </p>
+                  <p>Create a new start and accept state. Add ε-transitions to both sub-machines. The machine chooses a branch without reading any input.</p>
+                </div>
+
+                <div className="rounded-[6px] border border-[var(--border-subtle)] bg-slate-900/35 p-3">
+                  <p className="mb-1.5">
+                    <code className="px-1.5 py-0.5 rounded-[2px] border border-[var(--accent-teal)]/40 text-[var(--accent-teal)]" style={{ fontFamily: 'var(--font-mono)' }}>
+                      Concatenation (ab)
+                    </code>
+                  </p>
+                  <p className="text-xs text-slate-400 mb-2" style={{ fontFamily: 'var(--font-mono)' }}>
+                    [a-machine] --e--&gt; [b-machine]
+                  </p>
+                  <p>Connect the accept state of the left machine to the start state of the right via ε. They run one after the other.</p>
+                </div>
+
+                <div className="rounded-[6px] border border-[var(--border-subtle)] bg-slate-900/35 p-3">
+                  <p className="mb-1.5">
+                    <code className="px-1.5 py-0.5 rounded-[2px] border border-[var(--accent-teal)]/40 text-[var(--accent-teal)]" style={{ fontFamily: 'var(--font-mono)' }}>
+                      Kleene Star (a*)
+                    </code>
+                  </p>
+                  <p className="text-xs text-slate-400 mb-2" style={{ fontFamily: 'var(--font-mono)' }}>
+                    qs --e--&gt; qf (skip)
+                    <br />
+                    qs --e--&gt; a-machine --e--&gt; qf
+                    <br />
+                    a-accept --e--&gt; a-start (loop)
+                  </p>
+                  <p>Add a new start and accept state. Add ε-transitions to allow skipping entirely (zero times) or looping back (many times).</p>
+                </div>
+
+                <div className="rounded-[6px] border border-[var(--border-subtle)] bg-slate-900/35 p-3">
+                  <p className="mb-1.5">
+                    <code className="px-1.5 py-0.5 rounded-[2px] border border-[var(--accent-teal)]/40 text-[var(--accent-teal)]" style={{ fontFamily: 'var(--font-mono)' }}>
+                      One or More (a+)
+                    </code>
+                  </p>
+                  <p className="text-xs text-slate-400 mb-2" style={{ fontFamily: 'var(--font-mono)' }}>
+                    qs --e--&gt; a-machine --e--&gt; qf
+                    <br />
+                    a-accept --e--&gt; a-start (loop)
+                  </p>
+                  <p>Like Kleene star but the skip-entirely path is removed. Must match at least once.</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Right: How to Use */}
+            <div className="p-4 lg:p-5 h-[430px] overflow-y-auto">
+              <h2
+                className="text-base md:text-lg font-bold text-[var(--accent-teal)] mb-4"
+                style={{ fontFamily: 'var(--font-mono)' }}
+              >
+                How to Use
+              </h2>
+
+              <ol className="space-y-3 text-sm text-slate-300 leading-relaxed list-decimal pl-5">
+                <li>Enter a regex in the input bar below using the supported syntax shown below it.</li>
+                <li>Click <code style={{ fontFamily: 'var(--font-mono)' }}>Convert</code> to build the E-NFA using Thompson's Construction.</li>
+                <li>Watch the Construction tab to see each rule applied step by step: the left panel shows which rule, the right panel builds the NFA live.</li>
+                <li>Switch to Automaton Graphs to see the complete E-NFA and the DFA side by side (built via Subset Construction).</li>
+                <li>Open DFA Transition Table to see every state and transition in tabular form.</li>
+                <li>Use the String Simulator at the bottom: type any string, hit Simulate, then step through it to see exactly which states the machine visits.</li>
+              </ol>
+
+              <div className="mt-4 rounded-[6px] border border-[var(--accent-teal)]/30 bg-[var(--accent-teal)]/10 px-3 py-2 text-xs text-slate-200">
+                <span style={{ fontFamily: 'var(--font-mono)' }}>
+                  💡 Try the Examples dropdown to load a preset regex and see a full walkthrough.
+                </span>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* ─── Regex Input ─────────────────────────────── */}
         <section
           className="rounded-[2px] bg-[var(--bg-secondary)]/80 border border-[var(--border-subtle)] p-5 shadow-xl"
@@ -299,6 +416,8 @@ export default function HomePage() {
           <Simulator
             nfa={nfa}
             dfa={dfa}
+            sampleStrings={sampleStrings}
+            onSimulationStart={() => setActiveTab('graphs')}
             onNFAStep={setNfaActiveStates}
             onDFAStep={setDfaActiveState}
             onNFAEdge={setNfaActiveEdge}

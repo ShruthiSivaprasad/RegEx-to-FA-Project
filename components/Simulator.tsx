@@ -3,17 +3,20 @@
 import { useState, useRef, useEffect } from 'react';
 import { NFA, DFA, SimulationResult, ActiveEdge } from '@/lib/types';
 import { simulateNFA, simulateDFA } from '@/lib/simulate';
+import { SampleString } from '@/lib/sampleStrings';
 
 interface SimulatorProps {
   nfa: NFA | null;
   dfa: DFA | null;
+  sampleStrings: SampleString[];
+  onSimulationStart: () => void;
   onNFAStep: (activeStates: string[]) => void;
   onDFAStep: (activeState: string) => void;
   onNFAEdge: (edge: ActiveEdge | null) => void;
   onDFAEdge: (edge: ActiveEdge | null) => void;
 }
 
-export default function Simulator({ nfa, dfa, onNFAStep, onDFAStep, onNFAEdge, onDFAEdge }: SimulatorProps) {
+export default function Simulator({ nfa, dfa, sampleStrings, onSimulationStart, onNFAStep, onDFAStep, onNFAEdge, onDFAEdge }: SimulatorProps) {
   const [inputStr, setInputStr] = useState('');
   const [mode, setMode] = useState<'nfa' | 'dfa'>('dfa');
   const [result, setResult] = useState<SimulationResult | null>(null);
@@ -25,15 +28,18 @@ export default function Simulator({ nfa, dfa, onNFAStep, onDFAStep, onNFAEdge, o
   // Compute simulation whenever input / mode changes
   function runSim() {
     if (mode === 'nfa' && nfa) {
+      onSimulationStart();
       const r = simulateNFA(nfa, inputStr);
       setResult(r);
       setStepIndex(0);
     } else if (mode === 'dfa' && dfa) {
+      onSimulationStart();
       const r = simulateDFA(dfa, inputStr);
       setResult(r);
       setStepIndex(0);
     }
   }
+
 
   // Propagate active-state highlights when step changes
   useEffect(() => {
@@ -76,11 +82,12 @@ export default function Simulator({ nfa, dfa, onNFAStep, onDFAStep, onNFAEdge, o
   }
 
   function startPlay() {
-    if (!result) return;
+    const playbackResult = result;
+    if (!playbackResult) return;
     setIsPlaying(true);
     playIntervalRef.current = setInterval(() => {
       setStepIndex(prev => {
-        if (prev >= result.steps.length - 1) {
+        if (prev >= playbackResult.steps.length - 1) {
           stopPlay();
           return prev;
         }
@@ -98,6 +105,13 @@ export default function Simulator({ nfa, dfa, onNFAStep, onDFAStep, onNFAEdge, o
       }
       startPlay();
     }
+  }
+
+  function handleSuggestedStringClick(value: string) {
+    stopPlay();
+    setInputStr(value);
+    setResult(null);
+    setStepIndex(0);
   }
 
   const currentStep = result?.steps[stepIndex];
@@ -161,6 +175,34 @@ export default function Simulator({ nfa, dfa, onNFAStep, onDFAStep, onNFAEdge, o
           Simulate
         </button>
       </div>
+
+      {/* Suggested strings */}
+      {sampleStrings.length > 0 && (
+        <div className="rounded-[6px] border border-[var(--border-subtle)] bg-slate-800/40 p-3">
+          <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-2">
+            Suggested Strings
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {sampleStrings.map((item, idx) => (
+              <button
+                key={`${item.value}-${item.accepted ? 'a' : 'r'}-${idx}`}
+                onClick={() => handleSuggestedStringClick(item.value)}
+                disabled={disabled}
+                className={`px-2.5 py-1 rounded-[2px] border text-xs transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
+                  item.accepted
+                    ? 'border-emerald-700 bg-emerald-950/40 text-emerald-300 hover:bg-emerald-900/40'
+                    : 'border-rose-800 bg-rose-950/30 text-rose-300 hover:bg-rose-900/30'
+                }`}
+                style={{fontFamily: 'var(--font-mono)'}}
+              >
+                <span className="mr-1">{item.accepted ? '✓' : '✗'}</span>
+                <span>{item.value === '' ? 'ε' : item.value}</span>
+                <span className="ml-1.5 opacity-80">{item.accepted ? 'Accepted' : 'Rejected'}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Simulation controls */}
       {result && (
@@ -237,8 +279,8 @@ export default function Simulator({ nfa, dfa, onNFAStep, onDFAStep, onNFAEdge, o
           {/* Controls */}
           <div className="flex items-center gap-3">
             <button
-              onClick={() => setStepIndex(s => Math.max(0, s - 1))}
-              disabled={!canGoBack || isPlaying}
+              onClick={() => { stopPlay(); setStepIndex(s => Math.max(0, s - 1)); }}
+              disabled={!canGoBack}
               className="px-4 py-2 rounded-[2px] bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm font-semibold disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             >
               ← Prev
@@ -254,8 +296,8 @@ export default function Simulator({ nfa, dfa, onNFAStep, onDFAStep, onNFAEdge, o
               {isPlaying ? '⏸ Pause' : '▶ Auto-Play'}
             </button>
             <button
-              onClick={() => setStepIndex(s => Math.min(totalSteps - 1, s + 1))}
-              disabled={!canGoForward || isPlaying}
+              onClick={() => { stopPlay(); setStepIndex(s => Math.min(totalSteps - 1, s + 1)); }}
+              disabled={!canGoForward}
               className="px-4 py-2 rounded-[2px] bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm font-semibold disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             >
               Next →

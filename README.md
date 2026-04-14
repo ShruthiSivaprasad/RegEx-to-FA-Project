@@ -1,20 +1,36 @@
 # RegExp to Automaton Visualizer
 
-This project is an interactive Theory of Computation tool that converts a regular expression into:
+## Start Here 
+
+Open the deployed project first:
+
+### https://regex-to-fa-project.vercel.app/
+
+This is an interactive Theory of Computation tool that converts a regular expression into:
 
 - an epsilon-NFA using Thompson's Construction
 - a DFA using Subset Construction
 
-It also provides step-by-step simulation and visual graph/table views for verification.
+It also includes complete visual and educational support for checking correctness:
 
-## Project Context
-
-This repository is submitted for academic evaluation.
-The implementation focuses on correctness, transparency of construction, and explainable simulation behavior.
+- Thompson rule reference panel (Literal, Union, Concatenation, Kleene Star, One or More)
+- How-to-use guide panel for quick evaluator onboarding
+- Construction stepper with token-by-token build progression
+- Dual automaton visualization (epsilon-NFA and DFA)
+- DFA transition table view
+- String simulator with step controls and autoplay
+- Suggested sample strings (accepted and rejected) generated from the DFA
+- Dead-state visualization (∅) and dead-transition explanation during simulation
 
 ## Live Deployment
 
-Add deployed URL here.
+https://regex-to-fa-project.vercel.app/
+
+## Project Screenshot
+
+![RegExp to Automaton Visualizer UI](public/project-screenshot.png)
+
+If the screenshot is not visible on GitHub, place the image file at `public/project-screenshot.png`.
 
 ## Implemented Features
 
