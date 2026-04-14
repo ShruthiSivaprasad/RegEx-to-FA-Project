@@ -22,21 +22,26 @@ export default function Simulator({ nfa, dfa, sampleStrings, onSimulationStart, 
   const [result, setResult] = useState<SimulationResult | null>(null);
   const [stepIndex, setStepIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [pendingAutoPlay, setPendingAutoPlay] = useState(false);
   const playIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const disabled = !nfa && !dfa;
 
   // Compute simulation whenever input / mode changes
   function runSim() {
+    stopPlay();
+    setPendingAutoPlay(false);
     if (mode === 'nfa' && nfa) {
       onSimulationStart();
       const r = simulateNFA(nfa, inputStr);
       setResult(r);
       setStepIndex(0);
+      setPendingAutoPlay(true);
     } else if (mode === 'dfa' && dfa) {
       onSimulationStart();
       const r = simulateDFA(dfa, inputStr);
       setResult(r);
       setStepIndex(0);
+      setPendingAutoPlay(true);
     }
   }
 
@@ -72,6 +77,12 @@ export default function Simulator({ nfa, dfa, sampleStrings, onSimulationStart, 
       if (playIntervalRef.current) clearInterval(playIntervalRef.current);
     };
   }, []);
+
+  useEffect(() => {
+    if (!pendingAutoPlay || !result || stepIndex !== 0) return;
+    setPendingAutoPlay(false);
+    startPlay();
+  }, [pendingAutoPlay, result, stepIndex]);
 
   function stopPlay() {
     if (playIntervalRef.current) {

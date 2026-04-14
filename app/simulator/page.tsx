@@ -55,6 +55,7 @@ export default function SimulatorPage() {
   const [sampleStrings, setSampleStrings] = useState<SampleString[]>([]);
   const [postfix, setPostfix] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'construction' | 'graphs' | 'table'>('construction');
+  const [autoPlaySignal, setAutoPlaySignal] = useState(0);
 
   const handleConvert = useCallback(() => {
     setError(null);
@@ -72,6 +73,7 @@ export default function SimulatorPage() {
       setDfa(builtDFA);
       setSampleStrings(generateSampleStrings(builtDFA));
       setActiveTab('construction');
+      setAutoPlaySignal(signal => signal + 1);
     } catch (e: any) {
       setError(e.message ?? 'Unknown error');
       setNfa(null);
@@ -160,7 +162,7 @@ export default function SimulatorPage() {
 
           {activeTab === 'construction' && (
             <div className="p-4">
-              <ThompsonStepper steps={thompsonSteps} finalNfa={nfa!} />
+              <ThompsonStepper steps={thompsonSteps} finalNfa={nfa!} autoPlaySignal={autoPlaySignal} />
             </div>
           )}
 
@@ -270,14 +272,23 @@ export default function SimulatorPage() {
         </section>
 
         <section
-          className="rounded-[2px] bg-[var(--bg-secondary)]/80 border border-[var(--border-subtle)] p-5 shadow-xl"
+          className="mt-1 rounded-[2px] border border-[var(--border-subtle)] bg-[var(--bg-secondary)]/70 px-5 py-4 md:px-6 md:py-5"
           aria-label="Simulation Panel"
         >
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-              🎮 String Simulator
-            </span>
+          <div className="mb-4 h-px w-full bg-gradient-to-r from-transparent via-[var(--accent-teal)]/40 to-transparent" />
+
+          <div className="mb-5 md:mb-6 text-center px-2">
+            <h3
+              className="text-lg md:text-xl font-semibold tracking-[0.12em] uppercase text-[var(--accent-teal)]"
+              style={{ fontFamily: 'var(--font-heading)' }}
+            >
+              String Simulator
+            </h3>
+            <p className="mt-2 text-xs md:text-sm text-slate-400">
+              Test your generated DFA or ε-NFA with custom input strings
+            </p>
           </div>
+
           <Simulator
             nfa={nfa}
             dfa={dfa}

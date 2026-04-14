@@ -27,18 +27,21 @@ function getRuleStyle(rule: string) {
 interface ThompsonStepperProps {
   steps: ThompsonStep[];
   finalNfa: NFA;
+  autoPlaySignal?: number;
 }
 
-export default function ThompsonStepper({ steps, finalNfa }: ThompsonStepperProps) {
+export default function ThompsonStepper({ steps, finalNfa, autoPlaySignal }: ThompsonStepperProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const cyRef = useRef<cytoscape.Core | null>(null);
   const logRef = useRef<HTMLDivElement>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const lastAutoPlaySignalRef = useRef(autoPlaySignal);
   // Map each element id → the step index that introduced it
   const introMap = useRef<Map<string, number>>(new Map());
 
   const [stepIdx, setStepIdx] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [pendingAutoPlay, setPendingAutoPlay] = useState(false);
   const [speed, setSpeed] = useState(1500); // ms
 
   // ─── Build intro-step map ─────────────────────────────────────────────────
@@ -204,6 +207,15 @@ export default function ThompsonStepper({ steps, finalNfa }: ThompsonStepperProp
     };
   }, [steps, finalNfa]);
 
+  useEffect(() => {
+    if (autoPlaySignal === undefined || autoPlaySignal === lastAutoPlaySignalRef.current) return;
+    lastAutoPlaySignalRef.current = autoPlaySignal;
+    if (steps.length === 0) return;
+    stopPlay();
+    setStepIdx(0);
+    setPendingAutoPlay(true);
+  }, [autoPlaySignal]);
+
   // ─── Apply visibility + highlighting on step change ────────────────────────
   useEffect(() => {
     const cy = cyRef.current;
@@ -303,6 +315,12 @@ export default function ThompsonStepper({ steps, finalNfa }: ThompsonStepperProp
 
   // Cleanup interval on unmount
   useEffect(() => () => { if (intervalRef.current) clearInterval(intervalRef.current); }, []);
+
+  useEffect(() => {
+    if (!pendingAutoPlay || stepIdx !== 0 || steps.length === 0) return;
+    setPendingAutoPlay(false);
+    startPlay();
+  }, [pendingAutoPlay, stepIdx, steps.length, startPlay]);
 
   function togglePlay() {
     if (isPlaying) {

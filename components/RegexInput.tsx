@@ -24,6 +24,10 @@ export default function RegexInput({ value, onChange, onConvert, error }: RegexI
 
   return (
     <div className="flex flex-col gap-2 w-full">
+      <p className="text-sm text-slate-300 leading-relaxed">
+        Enter a regular expression to generate its automaton.
+      </p>
+
       <div className="flex flex-wrap gap-3 items-start">
         {/* Regex input */}
         <div className="flex-1 min-w-64">
@@ -37,7 +41,7 @@ export default function RegexInput({ value, onChange, onConvert, error }: RegexI
               value={value}
               onChange={e => onChange(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Enter regular expression…"
+              placeholder="e.g. (a|b)*abb"
               spellCheck={false}
               className={`w-full bg-[var(--bg-secondary)]/80 border rounded-[2px] pl-7 pr-4 py-3 text-slate-100 text-base placeholder-slate-500 focus:outline-none focus:ring-2 transition-all ${
                 error
@@ -82,14 +86,18 @@ export default function RegexInput({ value, onChange, onConvert, error }: RegexI
       </div>
 
       {/* Supported syntax hint */}
-      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
-        <span><code style={{ fontFamily: 'var(--font-mono)' }} className="text-slate-400">a–z, 0–9</code> literals</span>
-        <span><code style={{ fontFamily: 'var(--font-mono)' }} className="text-slate-400">|</code> union</span>
-        <span><code style={{ fontFamily: 'var(--font-mono)' }} className="text-slate-400">*</code> Kleene star</span>
-        <span><code style={{ fontFamily: 'var(--font-mono)' }} className="text-slate-400">+</code> one or more</span>
-        <span><code style={{ fontFamily: 'var(--font-mono)' }} className="text-slate-400">?</code> optional</span>
-        <span><code style={{ fontFamily: 'var(--font-mono)' }} className="text-slate-400">( )</code> grouping</span>
-        <span className="text-slate-600">· concatenation is implicit</span>
+      <div className="rounded-[2px] border border-[var(--border-subtle)] bg-[var(--bg-secondary)]/50 px-3 py-2.5">
+        <p className="text-xs text-slate-300 mb-1.5">Supported syntax:</p>
+        <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-slate-500">
+          <span><code style={{ fontFamily: 'var(--font-mono)' }} className="text-slate-300">a-z, 0-9</code> letters and digits</span>
+          <span><code style={{ fontFamily: 'var(--font-mono)' }} className="text-slate-300">|</code> union</span>
+          <span><code style={{ fontFamily: 'var(--font-mono)' }} className="text-slate-300">*</code> zero or more</span>
+          <span><code style={{ fontFamily: 'var(--font-mono)' }} className="text-slate-300">+</code> one or more</span>
+          <span><code style={{ fontFamily: 'var(--font-mono)' }} className="text-slate-300">?</code> optional</span>
+          <span><code style={{ fontFamily: 'var(--font-mono)' }} className="text-slate-300">( )</code> grouping</span>
+          <span className="text-slate-600">concatenation is implicit</span>
+        </div>
+        <p className="mt-1.5 text-xs text-slate-500">Not sure what to try? Use Examples →</p>
       </div>
 
       {/* Error message */}
